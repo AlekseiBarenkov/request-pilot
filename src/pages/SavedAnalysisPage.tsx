@@ -59,7 +59,7 @@ export function SavedAnalysisPage() {
   }
 
   return (
-    <div className="page">
+    <div className="page page--workspace page--saved">
       <div className="page-heading">
         <Link className="back-link" to="/history">
           К истории

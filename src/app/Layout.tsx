@@ -47,11 +47,11 @@ export function Layout() {
         <main className="app-main" id="main-content">
           <Outlet />
         </main>
-
-        <footer className="app-footer">
-          <div className="app-footer__inner">Демонстрационный проект. Данные клиентов вымышлены.</div>
-        </footer>
       </div>
+
+      <footer className="app-footer">
+        <div className="app-footer__inner">Демо-проект. Данные вымышлены.</div>
+      </footer>
     </div>
   )
 }

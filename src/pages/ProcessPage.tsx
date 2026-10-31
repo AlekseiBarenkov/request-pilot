@@ -290,7 +290,7 @@ export function ProcessPage() {
           : ''
 
   return (
-    <div className="page">
+    <div className="page page--workspace">
       <div className="page-heading">
         <h1>Обработка обращения</h1>
         <p>Вставьте обращение клиента или выберите пример, затем запустите разбор.</p>
@@ -326,7 +326,7 @@ export function ProcessPage() {
                 value={text}
                 onChange={(event) => handleTextChange(event.target.value)}
                 placeholder="Например: стиральная машина не сливает воду, нужен мастер. Укажите телефон и адрес."
-                autoSize={{ minRows: 10, maxRows: 18 }}
+                autoSize={{ minRows: 8, maxRows: 18 }}
                 maxLength={maxLength}
                 showCount
                 disabled={request.status === 'loading' || saving}

@@ -1,9 +1,52 @@
 @media (min-width: 1024px) {
-  .surface--source {
-    position: sticky;
-    top: 24px;
-    max-height: calc(100vh - 112px);
+  .page--workspace .process-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    align-items: stretch;
+  }
+
+  .page--workspace .surface {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+  }
+
+  .page--workspace .surface__body {
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: #b9cfca transparent;
+  }
+
+  .page--workspace .surface__body::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .page--workspace .surface__body::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: #b9cfca;
+  }
+
+  .page--workspace .surface__body::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .page--workspace .surface--source {
+    position: static;
+    max-height: none;
+    overflow: hidden;
+  }
+
+  .page--saved .process-grid {
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .page--saved .surface--source {
+    height: auto;
+    align-self: start;
   }
 }
 
@@ -54,6 +97,11 @@
 
   .app-main {
     padding: 16px;
+  }
+
+  .app-footer__inner {
+    padding: 8px 16px;
+    font-size: 12px;
   }
 
   .page-heading h1 {
