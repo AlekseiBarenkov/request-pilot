@@ -6,8 +6,9 @@
 черновик ответа, а затем подтверждает результат. Приложение не отправляет
 сообщения клиентам и не создаёт записи во внешней CRM.
 
-Сейчас завершены **этапы 1-6**: каркас, контракты, демо-режим, основной экран,
-история, DeepSeek, лимиты и мобильная доступность. Следующий этап - автотесты.
+Сейчас завершены **этапы 1-7**: каркас, демо-режим, основной экран, история,
+DeepSeek, лимиты, мобильная доступность и Playwright-тесты. Приложение готово к
+локальному запуску и production-сборке.
 
 ## Что уже работает
 
@@ -61,7 +62,7 @@
 ## Стек
 
 React 18, TypeScript strict, Vite, React Router, Ant Design, React Hook Form,
-Zod, dayjs, Fastify, Helmet, OpenAI SDK, IndexedDB, tsup.
+Zod, dayjs, Fastify, Helmet, OpenAI SDK, IndexedDB, Playwright, tsup.
 
 ## Запуск
 
@@ -146,6 +147,7 @@ npm run smoke:ai
 | `npm run build`        | проверяет типы, собирает `dist/` и `dist-server/` |
 | `npm start`            | запускает production-сервер из `dist-server/`     |
 | `npm run typecheck`    | проверяет типы фронтенда и сервера                |
+| `npm test`             | собирает проект и запускает 22 Playwright-теста   |
 | `npm run smoke:ai`     | запускает live smoke-пример через DeepSeek        |
 | `npm run lint`         | запускает ESLint                                  |
 | `npm run format`       | форматирует файлы Prettier                        |
@@ -159,15 +161,42 @@ npm run smoke:ai
 
 ```text
 src/          интерфейс, страницы, фичи, тема, IndexedDB
-src/styles/   base, layout, components, forms, analysis, history, antd, responsive
+src/styles/   base, layout, components, forms, analysis, history, antd, modal, responsive
 server/       Fastify, маршруты, провайдеры, промт, лимиты, финализация
 server/providers/  demo, fake, deepseek
 scripts/      smoke-ai.ts
+tests/        API, demo и fake сценарии Playwright
 shared/       константы, Zod-схемы и восемь примеров
 ```
 
 Направление зависимостей: `shared` не импортирует `src` и `server`; `src` и
 `server` используют только `shared`. Сервер не импортирует код интерфейса.
+
+## Тесты
+
+```bash
+npm test
+```
+
+Команда сначала собирает frontend и server, затем запускает Playwright. Тесты
+поднимают два Fastify-сервера с высокими лимитами:
+
+- `AI_PROVIDER=demo` на `3111`;
+- `AI_PROVIDER=fake` на `3112`.
+
+Ключ DeepSeek не нужен, реальные запросы не выполняются. Каждый тест получает
+новый контекст браузера и чистый IndexedDB. Проекты: desktop 1440x1000 и mobile
+390x844, часовой пояс `Asia/Yekaterinburg`.
+
+22 теста проверяют API, ошибки провайдера, отмену, demo-сценарий, сохранение и
+историю, мобильную и десктопную вёрстку. Тесты используют установленный Chrome.
+Если его нет:
+
+```bash
+npx playwright install chrome
+```
+
+Для ручной проверки реального API используйте `npm run smoke:ai`.
 
 ## Проверки этапа
 
@@ -175,7 +204,7 @@ shared/       константы, Zod-схемы и восемь примеро�
 npm run typecheck
 npm run lint
 npm run format:check
-npm run build
+npm test
 ```
 
 Проверено вручную:
@@ -218,10 +247,11 @@ npm run build
 - фокус после разбора переходит на заголовок результата, после сохранения - на
   заголовок записи; ошибки связаны с полями через `aria-describedby`;
 - контраст основных пар текст/фон проверен, минимальное значение выше 4.5:1;
+- 22 Playwright-теста проходят в demo и fake режимах на desktop и mobile;
 - проверка вёрстки на 1440 px и 390 px без горизонтальной прокрутки.
 
-Live-запрос к DeepSeek не запускался в этой среде, потому что ключ не задан.
-После добавления ключа его можно проверить командой `npm run smoke:ai`.
+Live-проверка DeepSeek требует ключ в `.env`; в репозитории его нет.
+`npm test` не делает реальных запросов и не расходует баланс.
 
 ## Скриншоты
 
@@ -239,9 +269,10 @@ Live-запрос к DeepSeek не запускался в этой среде, 
 - Лимиты хранятся в памяти процесса: сбрасываются при перезапуске и не работают
   между несколькими инстансами. Для публичного live-демо нужен внешний лимитер
   или шлюз, иначе безопаснее оставить демо-режим.
-- Автотесты Playwright - этап 7.
 - Для live-проверки DeepSeek нужен ключ в `.env`; без него доступны демо-режим,
   fake-провайдер и локальный mock.
+- Playwright использует установленный Chrome. На CI установите его командой
+  `npx playwright install chrome`.
 - История хранится только в текущем браузере. Между вкладками синхронизации нет,
   история перечитывается при возврате фокуса.
 - Кнопка «Заполнить демо-данными» доступна только в dev-режиме.
