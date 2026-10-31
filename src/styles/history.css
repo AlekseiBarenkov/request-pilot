@@ -35,7 +35,6 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--surface);
-  box-shadow: var(--shadow);
 }
 
 .history-toolbar .form-field {
@@ -68,7 +67,6 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--surface);
-  box-shadow: var(--shadow);
   color: inherit;
   transition:
     border-color 0.15s ease,
