@@ -5,7 +5,7 @@ import { normalizeForMatch } from '../../shared/normalize'
 import { ModelAnalysisSchema } from '../../shared/schemas/model'
 import type { Analysis } from '../../shared/schemas/analysis'
 import { AppError } from '../errors'
-import type { AnalysisProvider } from '../providers/types'
+import type { AnalysisProvider, TokenUsage } from '../providers/types'
 import { finalizeAnalysis } from './finalize'
 
 export type AnalyzeOutcome = {
@@ -13,6 +13,7 @@ export type AnalyzeOutcome = {
   provider: ProviderId
   model: string | null
   analysis: Analysis
+  usage: TokenUsage | null
 }
 
 export type AnalyzeInput = {
@@ -46,6 +47,7 @@ export async function analyzeText(input: AnalyzeInput): Promise<AnalyzeOutcome> 
     provider: input.provider.id,
     model: output.model,
     analysis,
+    usage: output.usage ?? null,
   }
 }
 

@@ -65,9 +65,18 @@ function readCompletion(completion: ChatCompletion, fallbackModel: string): Prov
     throw new AppError('INVALID_MODEL_RESPONSE')
   }
 
+  const usage = completion.usage
+
   return {
     raw: parseContent(content),
     model: completion.model.length > 0 ? completion.model : fallbackModel,
+    usage: usage
+      ? {
+          promptTokens: usage.prompt_tokens,
+          completionTokens: usage.completion_tokens,
+          totalTokens: usage.total_tokens,
+        }
+      : undefined,
   }
 }
 

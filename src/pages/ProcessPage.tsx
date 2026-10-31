@@ -11,7 +11,7 @@ import type { SavedAnalysis } from '../../shared/schemas/saved'
 import { ErrorNotice } from '../components/ErrorNotice'
 import { ModeBadge } from '../components/ModeBadge'
 import { useConfig } from '../data/hooks/useConfig'
-import { saveAnalysis } from '../data/storage/analysesRepo'
+import { resetStorage, saveAnalysis } from '../data/storage/analysesRepo'
 import { StorageCorruptError, StorageLimitError, StorageUnavailableError } from '../data/storage/errors'
 import { AnalysisEditor } from '../features/processing/AnalysisEditor'
 import { analyzeRequest } from '../lib/api'
@@ -49,6 +49,7 @@ export function ProcessPage() {
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [saveRecoveryAvailable, setSaveRecoveryAvailable] = useState(false)
 
   const abortRef = useRef<AbortController | null>(null)
   const generationRef = useRef(0)
@@ -112,6 +113,7 @@ export function ProcessPage() {
     setCreatedAt(null)
     setSaving(false)
     setSaveError(null)
+    setSaveRecoveryAvailable(false)
     setSaved(false)
     setAnalysisVersion((value) => value + 1)
     recordIdRef.current = null
@@ -173,6 +175,7 @@ export function ProcessPage() {
 
     setFieldError(null)
     setSaveError(null)
+    setSaveRecoveryAvailable(false)
     setSaving(false)
     setSaved(false)
     setAnalyzedText(null)
@@ -265,6 +268,7 @@ export function ProcessPage() {
 
     setSaving(true)
     setSaveError(null)
+    setSaveRecoveryAvailable(false)
 
     try {
       const savedRecord = await saveAnalysis(record)
@@ -274,9 +278,31 @@ export function ProcessPage() {
       navigate(`/history/${savedRecord.id}`)
     } catch (error) {
       setSaveError(getSaveErrorMessage(error))
+      setSaveRecoveryAvailable(error instanceof StorageCorruptError)
     } finally {
       setSaving(false)
     }
+  }
+
+  function handleResetStorage() {
+    modal.confirm({
+      title: 'Сбросить историю?',
+      content:
+        'История повреждена. Все сохранённые разборы будут удалены. После сброса повторите сохранение текущего результата.',
+      okText: 'Сбросить',
+      cancelText: 'Отмена',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        try {
+          await resetStorage()
+          setSaveError(null)
+          setSaveRecoveryAvailable(false)
+          message.success('История сброшена. Повторите сохранение.')
+        } catch (error) {
+          setSaveError(getSaveErrorMessage(error))
+        }
+      },
+    })
   }
 
   const announcement = saving
@@ -445,6 +471,14 @@ export function ProcessPage() {
                   isStale={isStale}
                   saving={saving}
                   saveError={saveError}
+                  saveRecovery={
+                    saveRecoveryAvailable
+                      ? {
+                          label: 'Сбросить историю',
+                          onReset: handleResetStorage,
+                        }
+                      : null
+                  }
                   onConfirm={handleConfirm}
                 />
               </>

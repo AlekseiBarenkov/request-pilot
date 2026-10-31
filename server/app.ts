@@ -1,3 +1,4 @@
+import helmet from '@fastify/helmet'
 import Fastify from 'fastify'
 import type { FastifyError, FastifyInstance } from 'fastify'
 
@@ -5,6 +6,7 @@ import type { ApiErrorResponse } from '../shared/schemas/api'
 import type { ServerConfig } from './config'
 import type { AppDependencies } from './dependencies'
 import { AppError, DEFAULT_ERROR_MESSAGES, isAppError } from './errors'
+import { createRequestLimiter } from './limits'
 import { createLoggerOptions } from './logger'
 import { createProvider } from './providers/registry'
 import { registerAnalyzeRoute } from './routes/analyze'
@@ -26,6 +28,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
   const dependencies: AppDependencies = {
     config: options.config,
     provider,
+    limiter: createRequestLimiter(options.config),
     mode: modeForProvider(provider.id),
   }
 
@@ -34,6 +37,13 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     bodyLimit: BODY_LIMIT_BYTES,
     trustProxy: options.config.trustProxy,
   })
+
+  if (options.config.nodeEnv === 'production') {
+    await app.register(helmet, {
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+    })
+  }
 
   app.setErrorHandler((error: FastifyError, request, reply) => {
     if (isAppError(error)) {

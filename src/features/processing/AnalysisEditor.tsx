@@ -52,10 +52,14 @@ export type AnalysisEditorProps = {
   isStale: boolean
   saving: boolean
   saveError: string | null
+  saveRecovery: {
+    label: string
+    onReset: () => void
+  } | null
   onConfirm: (analysis: Analysis) => void
 }
 
-export function AnalysisEditor({ result, isStale, saving, saveError, onConfirm }: AnalysisEditorProps) {
+export function AnalysisEditor({ result, isStale, saving, saveError, saveRecovery, onConfirm }: AnalysisEditorProps) {
   const model = result.analysis
   const [submitError, setSubmitError] = useState<string | null>(null)
   const form = useForm<AnalysisFormValues>({
@@ -436,6 +440,11 @@ export function AnalysisEditor({ result, isStale, saving, saveError, onConfirm }
               <Link className="back-link" to="/history">
                 Открыть историю
               </Link>
+              {saveRecovery ? (
+                <Button danger onClick={saveRecovery.onReset} disabled={saving}>
+                  {saveRecovery.label}
+                </Button>
+              ) : null}
             </div>
           ) : null}
           {submitError ? (
