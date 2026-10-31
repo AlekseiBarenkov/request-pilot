@@ -25,11 +25,12 @@
 html,
 body,
 #root {
-  min-height: 100%;
+  height: 100%;
 }
 
 body {
   margin: 0;
+  overflow: hidden;
   background: var(--page-bg);
   color: var(--text);
   font-family:
@@ -93,19 +94,27 @@ p {
 }
 
 .app-shell {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .app-header {
-  position: sticky;
-  top: 0;
-  z-index: 20;
+  flex: 0 0 auto;
   height: 64px;
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(8px);
+  background: #ffffff;
   border-bottom: 1px solid var(--border);
+}
+
+.app-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
 .app-header__inner {
@@ -176,7 +185,7 @@ p {
 }
 
 .app-main {
-  flex: 1;
+  flex: 1 0 auto;
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
@@ -184,6 +193,7 @@ p {
 }
 
 .app-footer {
+  flex: 0 0 auto;
   border-top: 1px solid var(--border);
   background: #fbfdfc;
 }
@@ -724,7 +734,7 @@ p {
 @media (min-width: 1024px) {
   .surface--source {
     position: sticky;
-    top: 88px;
+    top: 24px;
     max-height: calc(100vh - 112px);
     overflow-y: auto;
   }

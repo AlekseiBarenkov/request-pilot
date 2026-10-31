@@ -36,13 +36,15 @@ export function Layout() {
         </div>
       </header>
 
-      <main className="app-main" id="main-content">
-        <Outlet />
-      </main>
+      <div className="app-content">
+        <main className="app-main" id="main-content">
+          <Outlet />
+        </main>
 
-      <footer className="app-footer">
-        <div className="app-footer__inner">Демонстрационный проект. Данные клиентов вымышлены.</div>
-      </footer>
+        <footer className="app-footer">
+          <div className="app-footer__inner">Демонстрационный проект. Данные клиентов вымышлены.</div>
+        </footer>
+      </div>
     </div>
   )
 }
