@@ -69,6 +69,18 @@
     grid-column: 1 / -1;
     justify-content: flex-start;
   }
+
+  .page--history {
+    flex: 0 0 auto;
+  }
+
+  .history-scroll {
+    flex: 0 0 auto;
+    padding-right: 0;
+    padding-bottom: 8px;
+    overflow: visible;
+    scrollbar-gutter: auto;
+  }
 }
 
 @media (max-width: 720px) {

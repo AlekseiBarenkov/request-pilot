@@ -130,7 +130,7 @@ export function HistoryPage() {
   }
 
   return (
-    <div className="page">
+    <div className="page page--history">
       <div className="page-heading page-heading--row">
         <div>
           <h1>История разборов</h1>
@@ -213,6 +213,7 @@ export function HistoryPage() {
                   value={category}
                   onChange={(value) => setCategory(value)}
                   options={categoryOptions}
+                  popupMatchSelectWidth={false}
                 />
               </div>
 
@@ -230,72 +231,76 @@ export function HistoryPage() {
             </div>
           ) : null}
 
-          {analyses.length === 0 ? (
-            <EmptyState
-              title="Пока нет подтверждённых разборов"
-              description="Разберите обращение клиента и подтвердите результат, чтобы он появился в истории."
-              action={
-                <div className="empty-state__actions">
-                  <Link to="/">
-                    <Button type="primary">Перейти к обработке</Button>
-                  </Link>
-                  {canSeed ? (
-                    <Button onClick={handleSeed} loading={seeding}>
-                      Заполнить демо-данными
-                    </Button>
-                  ) : null}
-                </div>
-              }
-            />
-          ) : filtered.length === 0 ? (
-            <EmptyState
-              title="Ничего не найдено"
-              description="В истории нет записей, подходящих под запрос и выбранную категорию."
-              action={
-                hasFilters ? (
-                  <Button onClick={resetFilters}>Сбросить поиск и фильтр</Button>
-                ) : (
-                  <Button onClick={handleClear} loading={clearing}>
-                    Очистить историю
-                  </Button>
-                )
-              }
-            />
-          ) : (
-            <div className="history-list">
-              {filtered.map((record) => (
-                <article className="history-card" key={record.id}>
-                  <Link className="history-card__body" to={`/history/${record.id}`}>
-                    <div className="history-card__top">
-                      <span className="history-card__date">{formatDateTime(record.confirmedAt)}</span>
-                      <ModeBadge provider={record.provider} />
-                    </div>
-                    <h2 className="history-card__name">{record.analysis.customer.name.value ?? 'Клиент не указан'}</h2>
-                    <p className="history-card__summary">{record.analysis.summary}</p>
-                    <div className="history-card__meta">
-                      <span>
-                        {record.analysis.category.value === null
-                          ? 'Без категории'
-                          : CATEGORY[record.analysis.category.value]}
-                      </span>
-                      <span>{REQUEST_TYPE[record.analysis.requestType]}</span>
-                    </div>
-                  </Link>
-                  <div className="history-card__actions">
-                    <Button
-                      type="text"
-                      danger
-                      size="small"
-                      loading={deletingId === record.id}
-                      onClick={() => handleDelete(record)}
-                    >
-                      Удалить
-                    </Button>
+          <div className="history-scroll">
+            {analyses.length === 0 ? (
+              <EmptyState
+                title="Пока нет подтверждённых разборов"
+                description="Разберите обращение клиента и подтвердите результат, чтобы он появился в истории."
+                action={
+                  <div className="empty-state__actions">
+                    <Link to="/">
+                      <Button type="primary">Перейти к обработке</Button>
+                    </Link>
+                    {canSeed ? (
+                      <Button onClick={handleSeed} loading={seeding}>
+                        Заполнить демо-данными
+                      </Button>
+                    ) : null}
                   </div>
-                </article>
-              ))}
-            </div>
-          )}
+                }
+              />
+            ) : filtered.length === 0 ? (
+              <EmptyState
+                title="Ничего не найдено"
+                description="В истории нет записей, подходящих под запрос и выбранную категорию."
+                action={
+                  hasFilters ? (
+                    <Button onClick={resetFilters}>Сбросить поиск и фильтр</Button>
+                  ) : (
+                    <Button onClick={handleClear} loading={clearing}>
+                      Очистить историю
+                    </Button>
+                  )
+                }
+              />
+            ) : (
+              <div className="history-list">
+                {filtered.map((record) => (
+                  <article className="history-card" key={record.id}>
+                    <Link className="history-card__body" to={`/history/${record.id}`}>
+                      <div className="history-card__top">
+                        <span className="history-card__date">{formatDateTime(record.confirmedAt)}</span>
+                        <ModeBadge provider={record.provider} />
+                      </div>
+                      <h2 className="history-card__name">
+                        {record.analysis.customer.name.value ?? 'Клиент не указан'}
+                      </h2>
+                      <p className="history-card__summary">{record.analysis.summary}</p>
+                      <div className="history-card__meta">
+                        <span>
+                          {record.analysis.category.value === null
+                            ? 'Без категории'
+                            : CATEGORY[record.analysis.category.value]}
+                        </span>
+                        <span>{REQUEST_TYPE[record.analysis.requestType]}</span>
+                      </div>
+                    </Link>
+                    <div className="history-card__actions">
+                      <Button
+                        type="text"
+                        danger
+                        size="small"
+                        loading={deletingId === record.id}
+                        onClick={() => handleDelete(record)}
+                      >
+                        Удалить
+                      </Button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
         </>
       ) : null}
     </div>
