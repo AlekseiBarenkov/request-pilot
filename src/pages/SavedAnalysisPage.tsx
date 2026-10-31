@@ -1,4 +1,5 @@
 import { Button, Result, Skeleton } from 'antd'
+import { useEffect, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { CATEGORY, REQUEST_TYPE } from '../../shared/constants'
@@ -11,6 +12,13 @@ import { formatDateTime } from '../lib/dates'
 export function SavedAnalysisPage() {
   const { id } = useParams<{ id: string }>()
   const { status, record, error } = useSavedAnalysis(id)
+  const headingRef = useRef<HTMLHeadingElement>(null)
+
+  useEffect(() => {
+    if (status === 'ready') {
+      headingRef.current?.focus({ preventScroll: true })
+    }
+  }, [status])
 
   if (status === 'loading') {
     return (
@@ -56,7 +64,9 @@ export function SavedAnalysisPage() {
         <Link className="back-link" to="/history">
           К истории
         </Link>
-        <h1>Разбор от {formatDateTime(record.confirmedAt)}</h1>
+        <h1 tabIndex={-1} ref={headingRef}>
+          Разбор от {formatDateTime(record.confirmedAt)}
+        </h1>
         <div className="meta-row">
           <ModeBadge provider={record.provider} />
           <span className="meta-tag">

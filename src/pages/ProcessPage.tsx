@@ -1,13 +1,19 @@
-import { App, Button, Input, Select, Skeleton } from 'antd'
+import { App, Button, Input, Modal, Select, Skeleton } from 'antd'
 import { useEffect, useRef, useState } from 'react'
+import { useBlocker, useNavigate } from 'react-router-dom'
 
 import { MAX_TEXT_LENGTH } from '../../shared/constants'
 import { DEMO_EXAMPLES } from '../../shared/examples'
+import type { DemoExample } from '../../shared/examples'
+import type { Analysis } from '../../shared/schemas/analysis'
 import type { AnalyzeResponse } from '../../shared/schemas/api'
+import type { SavedAnalysis } from '../../shared/schemas/saved'
 import { ErrorNotice } from '../components/ErrorNotice'
 import { ModeBadge } from '../components/ModeBadge'
 import { useConfig } from '../data/hooks/useConfig'
-import { AnalysisPreview } from '../features/processing/AnalysisPreview'
+import { saveAnalysis } from '../data/storage/analysesRepo'
+import { StorageCorruptError, StorageLimitError, StorageUnavailableError } from '../data/storage/errors'
+import { AnalysisEditor } from '../features/processing/AnalysisEditor'
 import { analyzeRequest } from '../lib/api'
 import { ApiError, isAbortError, toUserMessage } from '../lib/errors'
 import type { ClientErrorCode } from '../lib/errors'
@@ -30,31 +36,46 @@ const INITIAL_REQUEST: RequestState = {
 
 export function ProcessPage() {
   const { status: configStatus, config, error: configError, retry: retryConfig } = useConfig()
-  const { message } = App.useApp()
+  const { message, modal } = App.useApp()
+  const navigate = useNavigate()
 
   const [text, setText] = useState('')
   const [selectedExampleId, setSelectedExampleId] = useState<string | null>(null)
   const [fieldError, setFieldError] = useState<string | null>(null)
   const [request, setRequest] = useState<RequestState>(INITIAL_REQUEST)
   const [analyzedText, setAnalyzedText] = useState<string | null>(null)
+  const [createdAt, setCreatedAt] = useState<string | null>(null)
+  const [analysisVersion, setAnalysisVersion] = useState(0)
+  const [saved, setSaved] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   const abortRef = useRef<AbortController | null>(null)
   const generationRef = useRef(0)
   const resultHeadingRef = useRef<HTMLHeadingElement>(null)
+  const recordIdRef = useRef<string | null>(null)
+  const allowNavigationRef = useRef(false)
 
   const maxLength = config?.maxTextLength ?? MAX_TEXT_LENGTH
   const trimmedText = text.trim()
   const isStale = request.status === 'success' && analyzedText !== null && trimmedText !== analyzedText
+  const hasUnsavedResult = request.status === 'success' && request.result !== null && !saved
   const isDemo = config?.mode === 'demo'
   const canAnalyze =
     configStatus === 'ready' &&
     request.status !== 'loading' &&
+    !saving &&
     trimmedText.length > 0 &&
     trimmedText.length <= maxLength
 
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      hasUnsavedResult && !allowNavigationRef.current && currentLocation.pathname !== nextLocation.pathname,
+  )
+
   useEffect(() => {
     if (request.status === 'success') {
-      resultHeadingRef.current?.focus()
+      resultHeadingRef.current?.focus({ preventScroll: true })
     }
   }, [request.status])
 
@@ -64,6 +85,45 @@ export function ProcessPage() {
       abortRef.current?.abort()
     }
   }, [])
+
+  useEffect(() => {
+    if (!hasUnsavedResult) {
+      return
+    }
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault()
+      event.returnValue = ''
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [hasUnsavedResult])
+
+  function resetResult() {
+    generationRef.current += 1
+    abortRef.current?.abort()
+    abortRef.current = null
+    setRequest(INITIAL_REQUEST)
+    setAnalyzedText(null)
+    setCreatedAt(null)
+    setSaving(false)
+    setSaveError(null)
+    setSaved(false)
+    setAnalysisVersion((value) => value + 1)
+    recordIdRef.current = null
+    allowNavigationRef.current = false
+  }
+
+  function applyExample(example: DemoExample) {
+    resetResult()
+    setText(example.text)
+    setSelectedExampleId(example.id)
+    setFieldError(null)
+  }
 
   function handleTextChange(value: string) {
     setText(value)
@@ -78,9 +138,19 @@ export function ProcessPage() {
       return
     }
 
-    setText(example.text)
-    setSelectedExampleId(example.id)
-    setFieldError(null)
+    if (hasUnsavedResult) {
+      modal.confirm({
+        title: 'Есть несохранённые изменения',
+        content: 'Разбор ещё не подтверждён. Если выбрать другой пример, результат и правки будут потеряны.',
+        okText: 'Продолжить',
+        cancelText: 'Отмена',
+        okButtonProps: { danger: true },
+        onOk: () => applyExample(example),
+      })
+      return
+    }
+
+    applyExample(example)
   }
 
   async function handleAnalyze() {
@@ -102,7 +172,14 @@ export function ProcessPage() {
     generationRef.current = generation
 
     setFieldError(null)
+    setSaveError(null)
+    setSaving(false)
+    setSaved(false)
+    setAnalyzedText(null)
+    setCreatedAt(null)
     setRequest({ status: 'loading', result: null, error: null, errorCode: null })
+    recordIdRef.current = null
+    allowNavigationRef.current = false
 
     try {
       const result = await analyzeRequest(trimmedText, controller.signal)
@@ -112,6 +189,8 @@ export function ProcessPage() {
       }
 
       setAnalyzedText(trimmedText)
+      setCreatedAt(new Date().toISOString())
+      setAnalysisVersion((value) => value + 1)
       setRequest({ status: 'success', result, error: null, errorCode: null })
     } catch (error) {
       if (generation !== generationRef.current) {
@@ -136,16 +215,73 @@ export function ProcessPage() {
     }
   }
 
+  function handleAnalyzeClick() {
+    if (saving) {
+      return
+    }
+
+    if (hasUnsavedResult) {
+      modal.confirm({
+        title: 'Есть несохранённые изменения',
+        content: 'Разбор ещё не подтверждён. Если запустить новый, результат и правки будут потеряны.',
+        okText: 'Разобрать заново',
+        cancelText: 'Отмена',
+        okButtonProps: { danger: true },
+        onOk: () => {
+          void handleAnalyze()
+        },
+      })
+      return
+    }
+
+    void handleAnalyze()
+  }
+
   function handleCancel() {
-    generationRef.current += 1
-    abortRef.current?.abort()
-    abortRef.current = null
-    setRequest(INITIAL_REQUEST)
+    resetResult()
     message.info('Запрос отменён')
   }
 
-  const announcement =
-    request.status === 'loading'
+  async function handleConfirm(analysis: Analysis) {
+    if (!request.result || !analyzedText || isStale || saving) {
+      return
+    }
+
+    const recordId = recordIdRef.current ?? crypto.randomUUID()
+    recordIdRef.current = recordId
+    const confirmedAt = new Date().toISOString()
+
+    const record: SavedAnalysis = {
+      id: recordId,
+      mode: request.result.mode,
+      provider: request.result.provider,
+      model: request.result.model,
+      sourceText: analyzedText,
+      createdAt: createdAt ?? confirmedAt,
+      confirmedAt,
+      modelAnalysis: request.result.analysis,
+      analysis,
+    }
+
+    setSaving(true)
+    setSaveError(null)
+
+    try {
+      const savedRecord = await saveAnalysis(record)
+      allowNavigationRef.current = true
+      setSaved(true)
+      message.success('Разбор сохранён')
+      navigate(`/history/${savedRecord.id}`)
+    } catch (error) {
+      setSaveError(getSaveErrorMessage(error))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const announcement = saving
+    ? 'Сохраняем разбор.'
+    : request.status === 'loading'
       ? 'Идёт разбор обращения.'
       : request.status === 'success'
         ? 'Разбор готов. Проверьте поля и черновик ответа.'
@@ -193,7 +329,7 @@ export function ProcessPage() {
                 autoSize={{ minRows: 10, maxRows: 18 }}
                 maxLength={maxLength}
                 showCount
-                disabled={request.status === 'loading'}
+                disabled={request.status === 'loading' || saving}
                 status={fieldError ? 'error' : undefined}
                 aria-invalid={fieldError !== null}
                 aria-describedby={fieldError ? 'source-text-error' : 'source-text-hint'}
@@ -217,7 +353,7 @@ export function ProcessPage() {
                 value={selectedExampleId ?? undefined}
                 onChange={handleExampleChange}
                 placeholder="Выберите один из восьми примеров"
-                disabled={request.status === 'loading'}
+                disabled={request.status === 'loading' || saving}
                 options={DEMO_EXAMPLES.map((example, index) => ({
                   value: example.id,
                   label: `${index + 1}. ${example.title}`,
@@ -250,7 +386,7 @@ export function ProcessPage() {
                   Отменить
                 </Button>
               ) : (
-                <Button type="primary" size="large" onClick={() => void handleAnalyze()} disabled={!canAnalyze}>
+                <Button type="primary" size="large" onClick={handleAnalyzeClick} disabled={!canAnalyze}>
                   {request.status === 'success' ? 'Разобрать заново' : 'Разобрать обращение'}
                 </Button>
               )}
@@ -303,12 +439,41 @@ export function ProcessPage() {
                     Текст изменился после разбора. Разберите обращение заново.
                   </div>
                 ) : null}
-                <AnalysisPreview result={request.result} />
+                <AnalysisEditor
+                  key={analysisVersion}
+                  result={request.result}
+                  isStale={isStale}
+                  saving={saving}
+                  saveError={saveError}
+                  onConfirm={handleConfirm}
+                />
               </>
             ) : null}
           </div>
         </section>
       </div>
+
+      <Modal
+        open={blocker.state === 'blocked'}
+        title="Есть несохранённые изменения"
+        okText="Уйти"
+        cancelText="Остаться"
+        okButtonProps={{ danger: true }}
+        closable={false}
+        maskClosable={false}
+        onOk={() => {
+          if (blocker.state === 'blocked') {
+            blocker.proceed()
+          }
+        }}
+        onCancel={() => {
+          if (blocker.state === 'blocked') {
+            blocker.reset()
+          }
+        }}
+      >
+        Разбор ещё не подтверждён. Если уйти со страницы, результат и правки будут потеряны.
+      </Modal>
     </div>
   )
 }
@@ -326,4 +491,20 @@ function ResultPlaceholder() {
       </p>
     </div>
   )
+}
+
+function getSaveErrorMessage(error: unknown): string {
+  if (
+    error instanceof StorageLimitError ||
+    error instanceof StorageCorruptError ||
+    error instanceof StorageUnavailableError
+  ) {
+    return error.message
+  }
+
+  if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+    return 'В браузере закончилось место для истории. Удалите старые записи и попробуйте снова.'
+  }
+
+  return 'Не удалось сохранить разбор. Попробуйте ещё раз.'
 }

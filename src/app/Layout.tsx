@@ -1,10 +1,17 @@
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 
 import { ModeBadge } from '../components/ModeBadge'
 import { useConfig } from '../data/hooks/useConfig'
 
 export function Layout() {
   const { status, config } = useConfig()
+  const location = useLocation()
+  const contentRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    contentRef.current?.scrollTo({ top: 0, left: 0 })
+  }, [location.pathname])
 
   return (
     <div className="app-shell">
@@ -36,7 +43,7 @@ export function Layout() {
         </div>
       </header>
 
-      <div className="app-content">
+      <div className="app-content" ref={contentRef}>
         <main className="app-main" id="main-content">
           <Outlet />
         </main>

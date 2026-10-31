@@ -4,21 +4,14 @@ import type { Evidence } from '../../../shared/schemas/analysis'
 import type { AnalyzeResponse } from '../../../shared/schemas/api'
 import { EvidenceNote } from '../../components/EvidenceNote'
 import { ModeBadge } from '../../components/ModeBadge'
+import { ResultModeNotice } from '../../components/ResultModeNotice'
 
 export function AnalysisPreview({ result }: { result: AnalyzeResponse }) {
   const { analysis } = result
 
   return (
     <div className="analysis">
-      {result.mode === 'demo' ? (
-        <div className="notice notice--demo" role="note">
-          <strong>Подготовленный пример.</strong> Модель не вызывалась.
-        </div>
-      ) : (
-        <div className="notice notice--live" role="note">
-          {result.provider === 'deepseek' ? 'Разбор DeepSeek' : 'Тестовый режим'}
-        </div>
-      )}
+      <ResultModeNotice mode={result.mode} provider={result.provider} />
 
       <div className="analysis__meta">
         <ModeBadge provider={result.provider} />

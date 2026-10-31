@@ -31,6 +31,7 @@ body,
 body {
   margin: 0;
   overflow: hidden;
+  overflow: clip;
   background: var(--page-bg);
   color: var(--text);
   font-family:
