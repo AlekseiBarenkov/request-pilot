@@ -181,9 +181,12 @@
     right: 0 !important;
     bottom: 0 !important;
     left: 0 !important;
+    display: flex;
+    flex-direction: column;
     width: 100% !important;
+    height: 88vh !important;
     max-width: 100% !important;
-    max-height: 60vh;
+    max-height: 88vh !important;
     padding: 4px 0 env(safe-area-inset-bottom);
     overflow: hidden;
     border: 1px solid var(--border);
@@ -200,10 +203,18 @@
     margin: 8px auto 4px;
     border-radius: 999px;
     background: #cbd5d1;
+    flex: 0 0 auto;
+  }
+
+  .ant-select-dropdown.app-select-sheet .rc-virtual-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100% !important;
   }
 
   .ant-select-dropdown.app-select-sheet .rc-virtual-list-holder {
-    max-height: calc(60vh - 24px);
+    height: 100% !important;
+    max-height: none !important;
   }
 
   .ant-select-dropdown.app-select-sheet .ant-select-item-option {
