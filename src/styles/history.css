@@ -6,8 +6,7 @@
 .history-scroll {
   flex: 1 1 auto;
   min-height: 0;
-  padding-right: 4px;
-  padding-bottom: 16px;
+  padding: 4px 4px 0 0;
   overflow-y: auto;
   scrollbar-gutter: stable;
   scrollbar-width: thin;
@@ -32,7 +31,7 @@
   grid-template-columns: minmax(0, 1fr) 260px auto;
   gap: 16px;
   align-items: end;
-  padding: 16px 18px;
+  padding: 16px;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--surface);
@@ -64,8 +63,8 @@
 .history-card {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 18px;
+  gap: 8px;
+  padding: 16px;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--surface);
@@ -83,8 +82,9 @@
 
 .history-card__body {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   color: inherit;
   text-decoration: none;
 }
@@ -102,6 +102,7 @@
 .history-card__actions {
   display: flex;
   justify-content: flex-end;
+  margin-top: auto;
   padding-top: 8px;
   border-top: 1px solid var(--border-soft);
 }

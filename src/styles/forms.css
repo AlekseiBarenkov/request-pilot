@@ -14,13 +14,13 @@
 .analysis-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 .analysis-fields {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
   min-width: 0;
   margin: 0;
   padding: 0;
@@ -71,7 +71,7 @@
 }
 
 .form-field .ant-input-textarea-show-count {
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 .form-label {

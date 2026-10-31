@@ -76,8 +76,7 @@
 
   .history-scroll {
     flex: 0 0 auto;
-    padding-right: 0;
-    padding-bottom: 8px;
+    padding: 4px 0 0;
     overflow: visible;
     scrollbar-gutter: auto;
   }
@@ -104,12 +103,14 @@
     order: 3;
     width: 100%;
     margin-left: 0;
-    gap: 2px;
+    gap: 4px;
   }
 
   .app-nav__link {
-    flex: 1;
-    justify-content: center;
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: 14px;
   }
 
   .app-header__mode {
@@ -154,7 +155,7 @@
 
   .history-toolbar {
     grid-template-columns: minmax(0, 1fr);
-    padding: 14px;
+    padding: 16px;
   }
 
   .history-toolbar__actions {
