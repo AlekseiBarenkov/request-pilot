@@ -141,7 +141,7 @@
   }
 
   body.app-result-visible .app-content {
-    margin-bottom: 72px;
+    margin-bottom: 88px;
   }
 
   .analysis-form {
@@ -154,10 +154,21 @@
     bottom: 56px;
     left: 16px;
     z-index: 25;
-    width: auto;
+    width: auto !important;
+    border-radius: 10px;
     visibility: hidden;
     pointer-events: none;
     box-shadow: 0 8px 20px rgba(15, 118, 110, 0.18);
+  }
+
+  .mobile-action.ant-btn {
+    height: 50px !important;
+    min-height: 50px;
+    padding-block: 0;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.2;
   }
 
   .page--result-visible .editor-submit {
@@ -170,8 +181,12 @@
     position: fixed;
     right: 16px;
     bottom: 56px;
+    left: auto;
     z-index: 30;
+    width: auto !important;
+    max-width: calc(100% - 32px);
     min-height: 44px;
+    justify-content: center;
     box-shadow: 0 8px 20px rgba(31, 41, 55, 0.16);
   }
 
@@ -193,6 +208,10 @@
     border-radius: 16px 16px 0 0;
     box-shadow: 0 -12px 32px rgba(31, 41, 55, 0.18);
     z-index: 1100;
+  }
+
+  .ant-select-dropdown.app-select-sheet.ant-select-dropdown-hidden {
+    display: none !important;
   }
 
   .ant-select-dropdown.app-select-sheet::before {

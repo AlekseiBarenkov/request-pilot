@@ -551,7 +551,7 @@ export function ProcessPage() {
       </div>
 
       {request.status === 'success' && !resultInView ? (
-        <Button className="to-result-button" type="primary" onClick={scrollToResult}>
+        <Button className="to-result-button mobile-action" type="primary" onClick={scrollToResult}>
           К результату
         </Button>
       ) : null}

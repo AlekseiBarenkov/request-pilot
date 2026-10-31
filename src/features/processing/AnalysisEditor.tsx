@@ -468,7 +468,7 @@ export function AnalysisEditor({ result, isStale, saving, saveError, saveRecover
             </div>
           ) : null}
           <Button
-            className="editor-submit"
+            className="editor-submit mobile-action"
             type="primary"
             size="large"
             htmlType="submit"
