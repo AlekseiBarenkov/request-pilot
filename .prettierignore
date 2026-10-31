@@ -1,0 +1,9 @@
+node_modules
+dist
+dist-server
+.npm-cache
+coverage
+playwright-report
+test-results
+package-lock.json
+request-pilot.md
