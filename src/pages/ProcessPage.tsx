@@ -50,10 +50,12 @@ export function ProcessPage() {
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saveRecoveryAvailable, setSaveRecoveryAvailable] = useState(false)
+  const [resultInView, setResultInView] = useState(false)
 
   const abortRef = useRef<AbortController | null>(null)
   const generationRef = useRef(0)
   const resultHeadingRef = useRef<HTMLHeadingElement>(null)
+  const resultSectionRef = useRef<HTMLElement>(null)
   const recordIdRef = useRef<string | null>(null)
   const allowNavigationRef = useRef(false)
 
@@ -76,7 +78,53 @@ export function ProcessPage() {
 
   useEffect(() => {
     if (request.status === 'success') {
-      resultHeadingRef.current?.focus({ preventScroll: true })
+      const heading = resultHeadingRef.current
+
+      if (heading) {
+        if (window.matchMedia('(max-width: 1023px)').matches) {
+          heading.scrollIntoView({
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+            block: 'start',
+          })
+        }
+
+        heading.focus({ preventScroll: true })
+      }
+    }
+  }, [request.status])
+
+  useEffect(() => {
+    if (request.status !== 'success') {
+      setResultInView(false)
+      return
+    }
+
+    const section = resultSectionRef.current
+
+    if (!section || typeof IntersectionObserver === 'undefined') {
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0]
+        setResultInView(entry?.isIntersecting ?? false)
+      },
+      { threshold: 0.15 },
+    )
+
+    observer.observe(section)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [request.status])
+
+  useEffect(() => {
+    document.body.classList.toggle('app-result-visible', request.status === 'success')
+
+    return () => {
+      document.body.classList.remove('app-result-visible')
     }
   }, [request.status])
 
@@ -245,6 +293,20 @@ export function ProcessPage() {
     message.info('Запрос отменён')
   }
 
+  function scrollToResult() {
+    const section = resultSectionRef.current
+
+    if (!section) {
+      return
+    }
+
+    section.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      block: 'start',
+    })
+    resultHeadingRef.current?.focus({ preventScroll: true })
+  }
+
   async function handleConfirm(analysis: Analysis) {
     if (!request.result || !analyzedText || isStale || saving) {
       return
@@ -316,7 +378,7 @@ export function ProcessPage() {
           : ''
 
   return (
-    <div className="page page--workspace">
+    <div className={`page page--workspace${resultInView ? ' page--result-visible' : ''}`}>
       <div className="page-heading">
         <h1>Обработка обращения</h1>
         <p>Вставьте обращение клиента или выберите пример, затем запустите разбор.</p>
@@ -426,7 +488,7 @@ export function ProcessPage() {
           </div>
         </section>
 
-        <section className="surface surface--result" aria-labelledby="result-heading">
+        <section className="surface surface--result" aria-labelledby="result-heading" ref={resultSectionRef}>
           <div className="surface__header">
             <h2 className="surface__title" id="result-heading" tabIndex={-1} ref={resultHeadingRef}>
               Результат разбора
@@ -486,6 +548,12 @@ export function ProcessPage() {
           </div>
         </section>
       </div>
+
+      {request.status === 'success' && !resultInView ? (
+        <Button className="to-result-button" type="primary" onClick={scrollToResult}>
+          К результату
+        </Button>
+      ) : null}
 
       <Modal
         open={blocker.state === 'blocked'}

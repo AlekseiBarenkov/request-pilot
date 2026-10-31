@@ -217,6 +217,10 @@
   margin-top: 16px;
 }
 
+.to-result-button {
+  display: none;
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;

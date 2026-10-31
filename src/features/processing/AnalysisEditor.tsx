@@ -151,15 +151,19 @@ export function AnalysisEditor({ result, isStale, saving, saveError, saveRecover
               control={control}
               name="category"
               render={({ field, fieldState }) => (
-                <Select<string>
-                  id="analysis-category"
-                  value={field.value ?? CATEGORY_NONE}
-                  onChange={(value) => field.onChange(toCategoryId(value))}
-                  onBlur={field.onBlur}
-                  options={categoryOptions}
-                  status={fieldState.error ? 'error' : undefined}
-                  aria-invalid={fieldState.error !== undefined}
-                />
+                <>
+                  <Select<string>
+                    id="analysis-category"
+                    value={field.value ?? CATEGORY_NONE}
+                    onChange={(value) => field.onChange(toCategoryId(value))}
+                    onBlur={field.onBlur}
+                    options={categoryOptions}
+                    status={fieldState.error ? 'error' : undefined}
+                    aria-invalid={fieldState.error !== undefined}
+                    aria-describedby={fieldState.error ? 'analysis-category-error' : undefined}
+                  />
+                  <FieldError id="analysis-category-error" message={fieldState.error?.message} />
+                </>
               )}
             />
             <EvidenceNote evidence={categoryEvidence} />
@@ -173,15 +177,19 @@ export function AnalysisEditor({ result, isStale, saving, saveError, saveRecover
               control={control}
               name="requestType"
               render={({ field, fieldState }) => (
-                <Select<RequestType>
-                  id="analysis-request-type"
-                  value={field.value}
-                  onChange={(value) => field.onChange(value)}
-                  onBlur={field.onBlur}
-                  options={requestTypeOptions}
-                  status={fieldState.error ? 'error' : undefined}
-                  aria-invalid={fieldState.error !== undefined}
-                />
+                <>
+                  <Select<RequestType>
+                    id="analysis-request-type"
+                    value={field.value}
+                    onChange={(value) => field.onChange(value)}
+                    onBlur={field.onBlur}
+                    options={requestTypeOptions}
+                    status={fieldState.error ? 'error' : undefined}
+                    aria-invalid={fieldState.error !== undefined}
+                    aria-describedby={fieldState.error ? 'analysis-request-type-error' : undefined}
+                  />
+                  <FieldError id="analysis-request-type-error" message={fieldState.error?.message} />
+                </>
               )}
             />
           </div>
@@ -305,15 +313,19 @@ export function AnalysisEditor({ result, isStale, saving, saveError, saveRecover
               control={control}
               name="urgency"
               render={({ field, fieldState }) => (
-                <Select<Urgency>
-                  id="analysis-urgency"
-                  value={field.value}
-                  onChange={(value) => field.onChange(value)}
-                  onBlur={field.onBlur}
-                  options={urgencyOptions}
-                  status={fieldState.error ? 'error' : undefined}
-                  aria-invalid={fieldState.error !== undefined}
-                />
+                <>
+                  <Select<Urgency>
+                    id="analysis-urgency"
+                    value={field.value}
+                    onChange={(value) => field.onChange(value)}
+                    onBlur={field.onBlur}
+                    options={urgencyOptions}
+                    status={fieldState.error ? 'error' : undefined}
+                    aria-invalid={fieldState.error !== undefined}
+                    aria-describedby={fieldState.error ? 'analysis-urgency-error' : undefined}
+                  />
+                  <FieldError id="analysis-urgency-error" message={fieldState.error?.message} />
+                </>
               )}
             />
             <UrgencyEvidence value={values.urgency} evidence={urgencyEvidence} />
@@ -452,7 +464,15 @@ export function AnalysisEditor({ result, isStale, saving, saveError, saveRecover
               <ErrorNotice title="Не удалось подготовить сохранение" message={submitError} />
             </div>
           ) : null}
-          <Button type="primary" size="large" htmlType="submit" block loading={saving} disabled={!canSave}>
+          <Button
+            className="editor-submit"
+            type="primary"
+            size="large"
+            htmlType="submit"
+            block
+            loading={saving}
+            disabled={!canSave}
+          >
             Подтвердить и сохранить
           </Button>
           <p className="form-hint">

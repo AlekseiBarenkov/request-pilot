@@ -108,9 +108,71 @@
 
   .app-nav__link {
     flex: 0 0 auto;
-    min-height: 36px;
-    padding: 0 10px;
+    min-height: 44px;
+    padding: 0 12px;
     font-size: 14px;
+  }
+
+  .app-brand,
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .ant-btn {
+    min-height: 44px;
+  }
+
+  .form-field .ant-input:not(textarea),
+  .form-field .ant-select-selector,
+  .history-toolbar .ant-input-affix-wrapper,
+  .history-toolbar .ant-select-selector {
+    min-height: 44px;
+  }
+
+  .form-field .ant-select-selector,
+  .history-toolbar .ant-select-selector {
+    align-items: center;
+  }
+
+  .app-content {
+    scroll-padding-bottom: 88px;
+  }
+
+  body.app-result-visible .app-content {
+    margin-bottom: 72px;
+  }
+
+  .analysis-form {
+    padding-bottom: 64px;
+  }
+
+  .editor-submit {
+    position: fixed;
+    right: 16px;
+    bottom: 56px;
+    left: 16px;
+    z-index: 25;
+    width: auto;
+    visibility: hidden;
+    pointer-events: none;
+    box-shadow: 0 8px 20px rgba(15, 118, 110, 0.18);
+  }
+
+  .page--result-visible .editor-submit {
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .to-result-button {
+    display: inline-flex;
+    position: fixed;
+    right: 16px;
+    bottom: 56px;
+    z-index: 30;
+    min-height: 44px;
+    box-shadow: 0 8px 20px rgba(31, 41, 55, 0.16);
   }
 
   .app-header__mode {
