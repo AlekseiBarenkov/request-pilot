@@ -161,6 +161,7 @@ export function AnalysisEditor({ result, isStale, saving, saveError, saveRecover
                     status={fieldState.error ? 'error' : undefined}
                     aria-invalid={fieldState.error !== undefined}
                     aria-describedby={fieldState.error ? 'analysis-category-error' : undefined}
+                    classNames={{ popup: { root: 'app-select-sheet' } }}
                   />
                   <FieldError id="analysis-category-error" message={fieldState.error?.message} />
                 </>
@@ -187,6 +188,7 @@ export function AnalysisEditor({ result, isStale, saving, saveError, saveRecover
                     status={fieldState.error ? 'error' : undefined}
                     aria-invalid={fieldState.error !== undefined}
                     aria-describedby={fieldState.error ? 'analysis-request-type-error' : undefined}
+                    classNames={{ popup: { root: 'app-select-sheet' } }}
                   />
                   <FieldError id="analysis-request-type-error" message={fieldState.error?.message} />
                 </>
@@ -323,6 +325,7 @@ export function AnalysisEditor({ result, isStale, saving, saveError, saveRecover
                     status={fieldState.error ? 'error' : undefined}
                     aria-invalid={fieldState.error !== undefined}
                     aria-describedby={fieldState.error ? 'analysis-urgency-error' : undefined}
+                    classNames={{ popup: { root: 'app-select-sheet' } }}
                   />
                   <FieldError id="analysis-urgency-error" message={fieldState.error?.message} />
                 </>

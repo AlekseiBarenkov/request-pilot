@@ -214,6 +214,7 @@ export function HistoryPage() {
                   onChange={(value) => setCategory(value)}
                   options={categoryOptions}
                   popupMatchSelectWidth={false}
+                  classNames={{ popup: { root: 'app-select-sheet' } }}
                 />
               </div>
 

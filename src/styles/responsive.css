@@ -175,6 +175,43 @@
     box-shadow: 0 8px 20px rgba(31, 41, 55, 0.16);
   }
 
+  .ant-select-dropdown.app-select-sheet {
+    position: fixed !important;
+    top: auto !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 60vh;
+    padding: 4px 0 env(safe-area-inset-bottom);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -12px 32px rgba(31, 41, 55, 0.18);
+    z-index: 1100;
+  }
+
+  .ant-select-dropdown.app-select-sheet::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    margin: 8px auto 4px;
+    border-radius: 999px;
+    background: #cbd5d1;
+  }
+
+  .ant-select-dropdown.app-select-sheet .rc-virtual-list-holder {
+    max-height: calc(60vh - 24px);
+  }
+
+  .ant-select-dropdown.app-select-sheet .ant-select-item-option {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
   .app-header__mode {
     margin-left: auto;
   }

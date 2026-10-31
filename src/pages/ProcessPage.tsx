@@ -442,6 +442,7 @@ export function ProcessPage() {
                 onChange={handleExampleChange}
                 placeholder="Выберите один из восьми примеров"
                 disabled={request.status === 'loading' || saving}
+                classNames={{ popup: { root: 'app-select-sheet' } }}
                 options={DEMO_EXAMPLES.map((example, index) => ({
                   value: example.id,
                   label: `${index + 1}. ${example.title}`,
