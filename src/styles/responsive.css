@@ -1,0 +1,111 @@
+@media (min-width: 1024px) {
+  .surface--source {
+    position: sticky;
+    top: 24px;
+    max-height: calc(100vh - 112px);
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 1023px) {
+  .process-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .surface--source {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-header {
+    height: auto;
+    min-height: 64px;
+  }
+
+  .app-header__inner {
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    min-height: 64px;
+    padding: 10px 16px;
+  }
+
+  .app-brand {
+    font-size: 17px;
+  }
+
+  .app-nav {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+    gap: 2px;
+  }
+
+  .app-nav__link {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .app-header__mode {
+    margin-left: auto;
+  }
+
+  .app-main {
+    padding: 16px;
+  }
+
+  .page-heading h1 {
+    font-size: 24px;
+  }
+
+  .page-heading--row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .surface__body {
+    padding: 16px;
+  }
+
+  .field,
+  .field--wide {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .source-actions .ant-btn {
+    width: 100%;
+  }
+
+  .history-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 380px) {
+  .app-header__inner {
+    padding: 8px 12px;
+  }
+
+  .app-main {
+    padding: 12px;
+  }
+
+  .app-brand {
+    font-size: 16px;
+  }
+
+  .mode-badge {
+    font-size: 11px;
+  }
+
+  .surface__header {
+    padding: 12px 14px;
+  }
+
+  .surface__body {
+    padding: 14px;
+  }
+}

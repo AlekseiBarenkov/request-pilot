@@ -91,9 +91,10 @@ AI_PROVIDER=auto, ключа нет -> demo
 ## Структура
 
 ```text
-src/       интерфейс, страницы, фичи, тема, IndexedDB
-server/    Fastify, маршруты, провайдеры, финализация
-shared/    константы, Zod-схемы и восемь примеров
+src/          интерфейс, страницы, фичи, тема, IndexedDB
+src/styles/   base, layout, components, forms, analysis, history, responsive
+server/       Fastify, маршруты, провайдеры, финализация
+shared/       константы, Zod-схемы и восемь примеров
 ```
 
 Направление зависимостей: `shared` не импортирует `src` и `server`; `src` и

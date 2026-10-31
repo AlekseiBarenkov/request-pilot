@@ -1,0 +1,229 @@
+.surface {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.surface--source {
+  background: var(--surface-muted);
+}
+
+.surface__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-soft);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.surface--source .surface__header {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.surface__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  outline: none;
+}
+
+.surface__title:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.surface__body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.mode-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 2px 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.mode-badge--demo {
+  color: var(--demo-text);
+  background: var(--demo-bg);
+  border-color: var(--demo-border);
+}
+
+.mode-badge--live {
+  color: #115e59;
+  background: #ccfbf1;
+  border-color: #99f6e4;
+}
+
+.mode-badge--test {
+  color: #374151;
+  background: #e5e7eb;
+  border-color: #d1d5db;
+}
+
+.mode-badge--loading {
+  color: var(--text-muted);
+  background: #f1f5f4;
+  border-color: var(--border);
+}
+
+.mode-badge--offline {
+  color: var(--error);
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.notice {
+  padding: 12px 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.notice--demo {
+  color: var(--demo-text);
+  background: var(--demo-bg);
+  border-color: var(--demo-border);
+}
+
+.notice--live {
+  color: #115e59;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.notice--stale {
+  color: var(--stale);
+  background: #fff7ed;
+  border-color: #fdba74;
+  font-weight: 500;
+}
+
+.evidence {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  background: var(--verified-bg);
+}
+
+.evidence__status {
+  color: #115e59;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.evidence__quote {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+  font-style: normal;
+  line-height: 1.5;
+}
+
+.evidence--unverified {
+  border-left-color: var(--stale);
+  background: #fff7ed;
+}
+
+.evidence--unverified .evidence__status {
+  color: var(--stale);
+}
+
+.evidence--warning {
+  padding: 8px 12px;
+  border-left: 3px solid var(--stale);
+  border-radius: 0 8px 8px 0;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 13px;
+}
+
+.evidence--muted {
+  padding: 8px 12px;
+  border-left: 3px solid var(--border);
+  border-radius: 0 8px 8px 0;
+  background: #f8faf9;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.meta-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 2px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #eef4f2;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 4px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.back-link-wrap {
+  margin-top: 16px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 24px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  text-align: center;
+}
+
+.empty-state__title {
+  margin: 0;
+  font-size: 18px;
+}
+
+.empty-state__description {
+  max-width: 50ch;
+  color: var(--text-muted);
+}
+
+.empty-state__action {
+  margin-top: 8px;
+}

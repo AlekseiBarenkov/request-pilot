@@ -1,5 +1,5 @@
 import 'antd/dist/reset.css'
-import './styles/global.css'
+import './styles/index.css'
 
 import dayjs from 'dayjs'
 import 'dayjs/locale/ru'
