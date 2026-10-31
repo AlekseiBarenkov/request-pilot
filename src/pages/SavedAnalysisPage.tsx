@@ -1,5 +1,5 @@
-import { Button, Result, Skeleton } from 'antd'
-import { useEffect, useRef } from 'react'
+import { App as AntApp, Button, Result, Skeleton } from 'antd'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { CATEGORY, REQUEST_TYPE } from '../../shared/constants'
@@ -7,18 +7,53 @@ import { ErrorNotice } from '../components/ErrorNotice'
 import { ModeBadge } from '../components/ModeBadge'
 import { useSavedAnalysis } from '../data/hooks/useSavedAnalysis'
 import { AnalysisPreview } from '../features/processing/AnalysisPreview'
+import { createExportEnvelope } from '../features/saved/exportRecord'
+import { copyToClipboard } from '../lib/clipboard'
 import { formatDateTime } from '../lib/dates'
+import { downloadJson } from '../lib/download'
 
 export function SavedAnalysisPage() {
   const { id } = useParams<{ id: string }>()
   const { status, record, error } = useSavedAnalysis(id)
+  const { message } = AntApp.useApp()
   const headingRef = useRef<HTMLHeadingElement>(null)
+  const [copying, setCopying] = useState(false)
 
   useEffect(() => {
     if (status === 'ready') {
       headingRef.current?.focus({ preventScroll: true })
     }
   }, [status])
+
+  async function handleCopy() {
+    if (!record) {
+      return
+    }
+
+    setCopying(true)
+
+    try {
+      await copyToClipboard(record.analysis.draftReply)
+      message.success('Ответ скопирован')
+    } catch {
+      message.error('Не удалось скопировать ответ. Выделите текст и скопируйте вручную.')
+    } finally {
+      setCopying(false)
+    }
+  }
+
+  function handleExport() {
+    if (!record) {
+      return
+    }
+
+    try {
+      downloadJson(`request-pilot-${record.id}.json`, createExportEnvelope(record))
+      message.success('Экспорт готов')
+    } catch {
+      message.error('Не удалось скачать файл.')
+    }
+  }
 
   if (status === 'loading') {
     return (
@@ -74,6 +109,12 @@ export function SavedAnalysisPage() {
           </span>
           <span className="meta-tag">{REQUEST_TYPE[record.analysis.requestType]}</span>
         </div>
+        <div className="saved-actions">
+          <Button onClick={() => void handleCopy()} loading={copying}>
+            Скопировать ответ
+          </Button>
+          <Button onClick={handleExport}>Экспорт JSON</Button>
+        </div>
       </div>
 
       <div className="process-grid">
@@ -102,6 +143,7 @@ export function SavedAnalysisPage() {
                 model: record.model,
                 analysis: record.analysis,
               }}
+              modelAnalysis={record.modelAnalysis}
             />
           </div>
         </section>

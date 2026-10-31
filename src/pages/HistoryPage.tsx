@@ -1,17 +1,47 @@
-import { Alert, App as AntApp, Button, Skeleton } from 'antd'
+import { Alert, App as AntApp, Button, Input, Select, Skeleton } from 'antd'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import { CATEGORY, HISTORY_LIMIT, REQUEST_TYPE } from '../../shared/constants'
+import { CATEGORY, CATEGORY_IDS, HISTORY_LIMIT, REQUEST_TYPE } from '../../shared/constants'
+import type { SavedAnalysis } from '../../shared/schemas/saved'
 import { EmptyState } from '../components/EmptyState'
 import { ErrorNotice } from '../components/ErrorNotice'
 import { ModeBadge } from '../components/ModeBadge'
+import { useConfig } from '../data/hooks/useConfig'
+import { useDebouncedValue } from '../data/hooks/useDebouncedValue'
 import { useHistory } from '../data/hooks/useHistory'
-import { resetStorage } from '../data/storage/analysesRepo'
+import { clearAnalyses, removeAnalysis, resetStorage } from '../data/storage/analysesRepo'
+import { filterAnalyses } from '../features/history/filterAnalyses'
+import type { CategoryFilter } from '../features/history/filterAnalyses'
+import { seedDemoHistory, DEMO_SEED_IDS } from '../features/history/seedDemo'
 import { formatDateTime } from '../lib/dates'
+
+const categoryOptions: Array<{ value: CategoryFilter; label: string }> = [
+  { value: 'all', label: 'Все категории' },
+  ...CATEGORY_IDS.map((id) => ({ value: id, label: CATEGORY[id] })),
+  { value: 'none', label: 'Без категории' },
+]
 
 export function HistoryPage() {
   const { status, analyses, error, reload } = useHistory()
+  const { config } = useConfig()
   const { modal, message } = AntApp.useApp()
+
+  const [query, setQuery] = useState('')
+  const [category, setCategory] = useState<CategoryFilter>('all')
+  const [seeding, setSeeding] = useState(false)
+  const [clearing, setClearing] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const debouncedQuery = useDebouncedValue(query)
+  const filtered = useMemo(
+    () => filterAnalyses(analyses, debouncedQuery, category),
+    [analyses, debouncedQuery, category],
+  )
+  const hasFilters = query.trim().length > 0 || category !== 'all'
+  const canSeed =
+    import.meta.env.DEV &&
+    config?.mode === 'demo' &&
+    DEMO_SEED_IDS.some((seedId) => !analyses.some((record) => record.id === seedId))
 
   function handleReset() {
     modal.confirm({
@@ -30,6 +60,73 @@ export function HistoryPage() {
         }
       },
     })
+  }
+
+  function handleClear() {
+    modal.confirm({
+      title: 'Очистить историю?',
+      content: `Будут удалены все сохранённые разборы: ${analyses.length}. Это действие нельзя отменить.`,
+      okText: 'Очистить',
+      cancelText: 'Отмена',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        setClearing(true)
+
+        try {
+          await clearAnalyses()
+          message.success('История очищена')
+          reload()
+        } catch (reason) {
+          message.error(reason instanceof Error ? reason.message : 'Не удалось очистить историю.')
+        } finally {
+          setClearing(false)
+        }
+      },
+    })
+  }
+
+  function handleDelete(record: SavedAnalysis) {
+    modal.confirm({
+      title: 'Удалить разбор?',
+      content: `Разбор от ${formatDateTime(record.confirmedAt)} будет удалён.`,
+      okText: 'Удалить',
+      cancelText: 'Отмена',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        setDeletingId(record.id)
+
+        try {
+          await removeAnalysis(record.id)
+          message.success('Разбор удалён')
+          reload()
+        } catch (reason) {
+          message.error(reason instanceof Error ? reason.message : 'Не удалось удалить разбор.')
+        } finally {
+          setDeletingId(null)
+        }
+      },
+    })
+  }
+
+  async function handleSeed() {
+    setSeeding(true)
+
+    try {
+      const result = await seedDemoHistory()
+      message.success(
+        result.added > 0 ? `Добавлено тестовых разборов: ${result.added}` : 'Тестовые данные уже добавлены',
+      )
+      reload()
+    } catch (reason) {
+      message.error(reason instanceof Error ? reason.message : 'Не удалось подготовить тестовые данные.')
+    } finally {
+      setSeeding(false)
+    }
+  }
+
+  function resetFilters() {
+    setQuery('')
+    setCategory('all')
   }
 
   return (
@@ -92,35 +189,110 @@ export function HistoryPage() {
             />
           ) : null}
 
+          {analyses.length > 0 ? (
+            <div className="history-toolbar">
+              <div className="form-field">
+                <label className="form-label" htmlFor="history-search">
+                  Поиск
+                </label>
+                <Input
+                  id="history-search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  allowClear
+                  placeholder="Имя, телефон, текст обращения"
+                />
+              </div>
+
+              <div className="form-field">
+                <label className="form-label" htmlFor="history-category">
+                  Категория
+                </label>
+                <Select<CategoryFilter>
+                  id="history-category"
+                  value={category}
+                  onChange={(value) => setCategory(value)}
+                  options={categoryOptions}
+                />
+              </div>
+
+              <div className="history-toolbar__actions">
+                <span className="muted-text">Найдено: {filtered.length}</span>
+                {canSeed ? (
+                  <Button type="text" onClick={handleSeed} loading={seeding}>
+                    Добавить демо-данные
+                  </Button>
+                ) : null}
+                <Button danger onClick={handleClear} loading={clearing}>
+                  Очистить историю
+                </Button>
+              </div>
+            </div>
+          ) : null}
+
           {analyses.length === 0 ? (
             <EmptyState
               title="Пока нет подтверждённых разборов"
               description="Разберите обращение клиента и подтвердите результат, чтобы он появился в истории."
               action={
-                <Link to="/">
-                  <Button type="primary">Перейти к обработке</Button>
-                </Link>
+                <div className="empty-state__actions">
+                  <Link to="/">
+                    <Button type="primary">Перейти к обработке</Button>
+                  </Link>
+                  {canSeed ? (
+                    <Button onClick={handleSeed} loading={seeding}>
+                      Заполнить демо-данными
+                    </Button>
+                  ) : null}
+                </div>
+              }
+            />
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              title="Ничего не найдено"
+              description="В истории нет записей, подходящих под запрос и выбранную категорию."
+              action={
+                hasFilters ? (
+                  <Button onClick={resetFilters}>Сбросить поиск и фильтр</Button>
+                ) : (
+                  <Button onClick={handleClear} loading={clearing}>
+                    Очистить историю
+                  </Button>
+                )
               }
             />
           ) : (
             <div className="history-list">
-              {analyses.map((analysis) => (
-                <Link className="history-card" key={analysis.id} to={`/history/${analysis.id}`}>
-                  <div className="history-card__top">
-                    <span className="history-card__date">{formatDateTime(analysis.confirmedAt)}</span>
-                    <ModeBadge provider={analysis.provider} />
+              {filtered.map((record) => (
+                <article className="history-card" key={record.id}>
+                  <Link className="history-card__body" to={`/history/${record.id}`}>
+                    <div className="history-card__top">
+                      <span className="history-card__date">{formatDateTime(record.confirmedAt)}</span>
+                      <ModeBadge provider={record.provider} />
+                    </div>
+                    <h2 className="history-card__name">{record.analysis.customer.name.value ?? 'Клиент не указан'}</h2>
+                    <p className="history-card__summary">{record.analysis.summary}</p>
+                    <div className="history-card__meta">
+                      <span>
+                        {record.analysis.category.value === null
+                          ? 'Без категории'
+                          : CATEGORY[record.analysis.category.value]}
+                      </span>
+                      <span>{REQUEST_TYPE[record.analysis.requestType]}</span>
+                    </div>
+                  </Link>
+                  <div className="history-card__actions">
+                    <Button
+                      type="text"
+                      danger
+                      size="small"
+                      loading={deletingId === record.id}
+                      onClick={() => handleDelete(record)}
+                    >
+                      Удалить
+                    </Button>
                   </div>
-                  <h2 className="history-card__name">{analysis.analysis.customer.name.value ?? 'Клиент не указан'}</h2>
-                  <p className="history-card__summary">{analysis.analysis.summary}</p>
-                  <div className="history-card__meta">
-                    <span>
-                      {analysis.analysis.category.value === null
-                        ? 'Без категории'
-                        : CATEGORY[analysis.analysis.category.value]}
-                    </span>
-                    <span>{REQUEST_TYPE[analysis.analysis.requestType]}</span>
-                  </div>
-                </Link>
+                </article>
               ))}
             </div>
           )}

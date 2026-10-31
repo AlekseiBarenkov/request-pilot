@@ -60,6 +60,15 @@
     max-height: none;
     overflow: visible;
   }
+
+  .history-toolbar {
+    grid-template-columns: minmax(0, 1fr) 220px;
+  }
+
+  .history-toolbar__actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
 }
 
 @media (max-width: 720px) {
@@ -129,6 +138,23 @@
 
   .history-list {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .history-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 14px;
+  }
+
+  .history-toolbar__actions {
+    justify-content: space-between;
+  }
+
+  .saved-actions {
+    width: 100%;
+  }
+
+  .saved-actions .ant-btn {
+    flex: 1;
   }
 }
 

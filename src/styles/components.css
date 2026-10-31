@@ -242,3 +242,10 @@
 .empty-state__action {
   margin-top: 8px;
 }
+
+.empty-state__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}

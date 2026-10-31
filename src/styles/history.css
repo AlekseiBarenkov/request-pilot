@@ -1,3 +1,31 @@
+.history-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px auto;
+  gap: 16px;
+  align-items: end;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.history-toolbar .form-field {
+  gap: 6px;
+}
+
+.history-toolbar .ant-select {
+  width: 100%;
+}
+
+.history-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
 .history-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -14,7 +42,6 @@
   background: var(--surface);
   box-shadow: var(--shadow);
   color: inherit;
-  text-decoration: none;
   transition:
     border-color 0.15s ease,
     transform 0.15s ease;
@@ -22,13 +49,32 @@
 
 .history-card:hover {
   border-color: #9fc9c1;
-  color: inherit;
   transform: translateY(-1px);
 }
 
-.history-card:focus-visible {
+.history-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.history-card__body:hover {
+  color: inherit;
+}
+
+.history-card__body:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.history-card__actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-soft);
 }
 
 .history-card__top {

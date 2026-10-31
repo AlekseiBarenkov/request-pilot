@@ -35,6 +35,10 @@
   font-size: 13px;
   font-weight: 600;
   line-height: 1.5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
 }
 
 .field dd {
@@ -52,6 +56,13 @@
 
 .field--wide {
   grid-template-columns: 180px minmax(0, 1fr);
+}
+
+.saved-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
 }
 
 .draft-text {
